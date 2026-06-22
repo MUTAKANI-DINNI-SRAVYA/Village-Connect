@@ -137,6 +137,8 @@ In your Render Web Service settings, navigate to the **Environment** tab and add
 | `SPRING_DATASOURCE_URL` | `jdbc:postgresql://<host>:<port>/<dbname>` (Convert the Render connection URL string into a JDBC URL format starting with `jdbc:postgresql://`) |
 | `SPRING_DATASOURCE_USERNAME` | `your_postgres_username` |
 | `SPRING_DATASOURCE_PASSWORD` | `your_postgres_password` |
+| `SPRING_DATASOURCE_DRIVER` | `org.postgresql.Driver` |
+| `SPRING_JPA_DIALECT` | `org.hibernate.dialect.PostgreSQLDialect` |
 | `GEMINI_API_KEY` | `your_gemini_api_key_here` |
 | `JWT_SECRET` | `A_very_long_secure_custom_jwt_secret_key_for_production` |
 
