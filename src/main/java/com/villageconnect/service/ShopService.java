@@ -28,6 +28,7 @@ public class ShopService {
                 shopDto.getLongitude(),
                 owner
         );
+        shop.setImageUrl(shopDto.getImageUrl());
         return shopRepository.save(shop);
     }
 
@@ -42,6 +43,7 @@ public class ShopService {
         shop.setDescription(shopDto.getDescription());
         shop.setLatitude(shopDto.getLatitude());
         shop.setLongitude(shopDto.getLongitude());
+        shop.setImageUrl(shopDto.getImageUrl());
         return shopRepository.save(shop);
     }
 

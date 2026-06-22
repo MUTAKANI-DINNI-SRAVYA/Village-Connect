@@ -42,7 +42,8 @@ public class ShopController {
                 shop.getDescription(),
                 shop.getLatitude(),
                 shop.getLongitude(),
-                shop.getOwner() != null ? shop.getOwner().getUserId() : null
+                shop.getOwner() != null ? shop.getOwner().getUserId() : null,
+                shop.getImageUrl()
         );
     }
 

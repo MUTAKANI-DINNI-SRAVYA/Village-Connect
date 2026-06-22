@@ -43,6 +43,9 @@ public class Shop {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+
     @NotNull
     private Double latitude;
 
@@ -155,5 +158,13 @@ public class Shop {
 
     public void setOwner(User owner) {
         this.owner = owner;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

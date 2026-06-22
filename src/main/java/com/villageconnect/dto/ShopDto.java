@@ -33,10 +33,11 @@ public class ShopDto {
     private Double longitude;
     
     private Long ownerId;
+    private String imageUrl;
 
     public ShopDto() {}
 
-    public ShopDto(Long shopId, String shopName, String ownerName, String phone, String village, String address, String category, String description, Double latitude, Double longitude, Long ownerId) {
+    public ShopDto(Long shopId, String shopName, String ownerName, String phone, String village, String address, String category, String description, Double latitude, Double longitude, Long ownerId, String imageUrl) {
         this.shopId = shopId;
         this.shopName = shopName;
         this.ownerName = ownerName;
@@ -48,6 +49,7 @@ public class ShopDto {
         this.latitude = latitude;
         this.longitude = longitude;
         this.ownerId = ownerId;
+        this.imageUrl = imageUrl;
     }
 
     public Long getShopId() {
@@ -136,5 +138,13 @@ public class ShopDto {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
