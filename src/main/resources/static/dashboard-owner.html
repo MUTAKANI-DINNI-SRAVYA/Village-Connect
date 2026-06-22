@@ -442,6 +442,7 @@
             const sel = document.getElementById('shop-selector');
             if (!myShops.length) {
                 sel.innerHTML = '<option value="">No shops yet — create one!</option>';
+                clearShopDashboard();
                 return;
             }
             sel.innerHTML = myShops.map(s => `<option value="${s.shopId}">${s.shopName}</option>`).join('');
@@ -456,7 +457,40 @@
     async function onShopChange() {
         activeShopId = parseInt(document.getElementById('shop-selector').value);
         activeShopData = myShops.find(s => s.shopId === activeShopId) || null;
-        if (activeShopId) await loadShopData();
+        if (activeShopId) {
+            await loadShopData();
+        } else {
+            clearShopDashboard();
+        }
+    }
+
+    function clearShopDashboard() {
+        activeShopId = null;
+        activeShopData = null;
+        document.getElementById('stat-revenue').innerText = '₹0';
+        document.getElementById('stat-pending').innerText = '0';
+        document.getElementById('stat-products').innerText = '0';
+        document.getElementById('stat-lowstock').innerText = '0';
+        document.getElementById('products-table-body').innerHTML = '<tr><td colspan="6" class="text-muted text-center py-3">No active shop.</td></tr>';
+        document.getElementById('services-list').innerHTML = '<div class="text-muted text-center py-3">No active shop.</div>';
+        document.getElementById('orders-table-body').innerHTML = '<tr><td colspan="10" class="text-muted text-center py-3">No active shop.</td></tr>';
+        document.getElementById('requests-table-body').innerHTML = '<tr><td colspan="6" class="text-muted text-center py-3">No active shop.</td></tr>';
+        document.getElementById('reviews-list-owner').innerHTML = '<div class="text-muted text-center py-3">No active shop.</div>';
+        document.getElementById('shop-profile-content').innerHTML = '<div class="text-muted text-center py-4">No shops registered yet. Click "New Shop" to register one!</div>';
+    }
+
+    async function deleteShop() {
+        if (!activeShopId) return;
+        if (!confirm(`Are you sure you want to delete the shop "${activeShopData.shopName}"? This will delete all products, services, and reviews associated with it, and cannot be undone.`)) {
+            return;
+        }
+        try {
+            await apiCall(`/shops/${activeShopId}`, { method: 'DELETE' });
+            alert('Shop deleted successfully!');
+            await loadShops();
+        } catch (err) {
+            alert('Failed to delete shop: ' + err.message);
+        }
     }
 
     async function loadShopData() {
@@ -847,9 +881,14 @@
                             <span><i class="bi bi-geo-alt-fill me-1"></i> ${s.village}</span>
                         </div>
                     </div>
-                    <button class="btn btn-light rounded-pill px-4" onclick="openEditShop()">
-                        <i class="bi bi-pencil me-1"></i> Edit Shop
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-light rounded-pill px-4" onclick="openEditShop()">
+                            <i class="bi bi-pencil me-1"></i> Edit Shop
+                        </button>
+                        <button class="btn btn-danger rounded-pill px-4" onclick="deleteShop()">
+                            <i class="bi bi-trash me-1"></i> Delete Shop
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="row g-4">
