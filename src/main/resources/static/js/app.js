@@ -241,3 +241,102 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnEn) btnEn.addEventListener('click', () => applyTranslations('en'));
     if (btnTe) btnTe.addEventListener('click', () => applyTranslations('te'));
 });
+
+/* ---------- Category Default Cover Images ---------- */
+const CATEGORY_DEFAULT_IMAGES = {
+    'Groceries': [
+        'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800',
+        'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=800',
+        'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=800',
+        'https://images.unsplash.com/photo-1583258292688-d0213df4a3a8?w=800'
+    ],
+    'Agriculture': [
+        'https://images.unsplash.com/photo-1589923188900-85dae523342b?w=800',
+        'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800',
+        'https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?w=800',
+        'https://images.unsplash.com/photo-1592982537447-6f2a6a0c8188?w=800'
+    ],
+    'Electrical': [
+        'https://images.unsplash.com/photo-1558211583-d26f610c1eb1?w=800',
+        'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800'
+    ],
+    'Medical': [
+        'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800',
+        'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?w=800',
+        'https://images.unsplash.com/photo-1607619056574-7b8f304b3b33?w=800'
+    ],
+    'Clothing': [
+        'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=800',
+        'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800',
+        'https://images.unsplash.com/photo-1479064555552-3ef4979f8908?w=800'
+    ],
+    'Food & Dining': [
+        'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800',
+        'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
+        'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800'
+    ],
+    'Stationery': [
+        'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=800',
+        'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800'
+    ],
+    'Footwear': [
+        'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800',
+        'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800'
+    ],
+    'Mobile Services': [
+        'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800',
+        'https://images.unsplash.com/photo-1580910051074-3eb694886505?w=800'
+    ],
+    'Tailoring': [
+        'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800',
+        'https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?w=800'
+    ],
+    'Saloon': [
+        'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=800',
+        'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=800'
+    ],
+    'Dairy & Poultry': [
+        'https://images.unsplash.com/photo-1527751171053-6ac5ec50000b?w=800',
+        'https://images.unsplash.com/photo-1500595046783-cd2118934840?w=800'
+    ],
+    'Automobile': [
+        'https://images.unsplash.com/photo-1486006920555-c77dce18193b?w=800',
+        'https://images.unsplash.com/photo-1517524206127-48bbd363f3d7?w=800'
+    ],
+    'Carpentry': [
+        'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800',
+        'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=800'
+    ],
+    'Construction': [
+        'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800',
+        'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800'
+    ],
+    'Veterinary': [
+        'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800',
+        'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=800'
+    ],
+    'Plumbing': [
+        'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800',
+        'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=800'
+    ],
+    'Fruits & Vegetables': [
+        'https://images.unsplash.com/photo-1610832958506-ee5633613df2?w=800',
+        'https://images.unsplash.com/photo-1543083503-0c3b88d75249?w=800'
+    ],
+    'Kitchenware': [
+        'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=800',
+        'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=800'
+    ]
+};
+
+function getShopCoverImage(shop) {
+    let img = shop.imageUrl ? shop.imageUrl.trim() : '';
+    if (!img) {
+        const category = shop.category || 'Groceries';
+        const list = CATEGORY_DEFAULT_IMAGES[category] || ['https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=800'];
+        const idx = (shop.shopId || 0) % list.length;
+        img = list[idx];
+    }
+    return img;
+}
+

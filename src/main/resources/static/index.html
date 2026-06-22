@@ -318,46 +318,7 @@
             return;
         }
         grid.innerHTML = shops.map(shop => {
-            let img = shop.imageUrl ? shop.imageUrl.trim() : '';
-            if (!img) {
-                const options = {
-                    'Groceries': [
-                        'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500',
-                        'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=500',
-                        'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=500',
-                        'https://images.unsplash.com/photo-1583258292688-d0213df4a3a8?w=500'
-                    ],
-                    'Agriculture': [
-                        'https://images.unsplash.com/photo-1589923188900-85dae523342b?w=500',
-                        'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=500',
-                        'https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?w=500',
-                        'https://images.unsplash.com/photo-1592982537447-6f2a6a0c8188?w=500'
-                    ],
-                    'Electrical': [
-                        'https://images.unsplash.com/photo-1558211583-d26f610c1eb1?w=500',
-                        'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500'
-                    ],
-                    'Medical': [
-                        'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=500',
-                        'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?w=500',
-                        'https://images.unsplash.com/photo-1607619056574-7b8f304b3b33?w=500'
-                    ],
-                    'Clothing': [
-                        'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=500',
-                        'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=500',
-                        'https://images.unsplash.com/photo-1479064555552-3ef4979f8908?w=500'
-                    ],
-                    'Food & Dining': [
-                        'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500',
-                        'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500',
-                        'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=500'
-                    ]
-                };
-                const category = shop.category || 'Groceries';
-                const list = options[category] || [catImages[category] || 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=500'];
-                const idx = (shop.shopId || 0) % list.length;
-                img = list[idx];
-            }
+            const img = getShopCoverImage(shop);
             return `
                 <div class="col-md-6 col-lg-4 fade-in-up">
                     <div class="card vc-card h-100">

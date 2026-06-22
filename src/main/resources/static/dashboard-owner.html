@@ -235,7 +235,7 @@
                     <div class="col-12"><label class="form-label small fw-semibold">Address *</label><input type="text" id="ns-address" class="form-control"></div>
                     <div class="col-md-6">
                         <label class="form-label small fw-semibold">Category *</label>
-                        <select id="ns-category" class="form-select">
+                        <select id="ns-category" class="form-select" onchange="handleCategoryChange('ns')">
                             <option value="Groceries">Groceries</option><option value="Agriculture">Agriculture</option>
                             <option value="Medical">Medical</option><option value="Electrical">Electrical</option>
                             <option value="Clothing">Clothing</option><option value="Food & Dining">Food & Dining</option>
@@ -264,7 +264,7 @@
                     <div class="col-12">
                         <div id="ns-map-preview" style="height:200px; border-radius:1rem; overflow:hidden; z-index:1;"></div>
                     </div>
-                    <div class="col-12"><label class="form-label small fw-semibold">Shop Cover Image URL (Optional)</label><input type="url" id="ns-image" class="form-control" placeholder="https://example.com/image.jpg"></div>
+                    <div class="col-12"><label class="form-label small fw-semibold">Shop Cover Image URL (Optional)</label><input type="url" id="ns-image" class="form-control" value="https://images.unsplash.com/photo-1542838132-92c53300491e?w=800" placeholder="https://example.com/image.jpg"></div>
                     <div class="col-12"><label class="form-label small fw-semibold">Description</label><textarea id="ns-desc" class="form-control" rows="2"></textarea></div>
                 </div>
                 <div id="shop-form-alert" class="mt-3"></div>
@@ -347,7 +347,7 @@
                     <div class="col-12"><label class="form-label small fw-semibold">Address *</label><input type="text" id="es-address" class="form-control"></div>
                     <div class="col-md-6">
                         <label class="form-label small fw-semibold">Category *</label>
-                        <select id="es-category" class="form-select">
+                        <select id="es-category" class="form-select" onchange="handleCategoryChange('es')">
                             <option value="Groceries">Groceries</option><option value="Agriculture">Agriculture</option>
                             <option value="Medical">Medical</option><option value="Electrical">Electrical</option>
                             <option value="Clothing">Clothing</option><option value="Food & Dining">Food & Dining</option>
@@ -832,46 +832,7 @@
             return;
         }
         const s = activeShopData;
-        let img = s.imageUrl ? s.imageUrl.trim() : '';
-        if (!img) {
-            const options = {
-                'Groceries': [
-                    'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800',
-                    'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=800',
-                    'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=800',
-                    'https://images.unsplash.com/photo-1583258292688-d0213df4a3a8?w=800'
-                ],
-                'Agriculture': [
-                    'https://images.unsplash.com/photo-1589923188900-85dae523342b?w=800',
-                    'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800',
-                    'https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?w=800',
-                    'https://images.unsplash.com/photo-1592982537447-6f2a6a0c8188?w=800'
-                ],
-                'Electrical': [
-                    'https://images.unsplash.com/photo-1558211583-d26f610c1eb1?w=800',
-                    'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800'
-                ],
-                'Medical': [
-                    'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800',
-                    'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?w=800',
-                    'https://images.unsplash.com/photo-1607619056574-7b8f304b3b33?w=800'
-                ],
-                'Clothing': [
-                    'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=800',
-                    'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800',
-                    'https://images.unsplash.com/photo-1479064555552-3ef4979f8908?w=800'
-                ],
-                'Food & Dining': [
-                    'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800',
-                    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
-                    'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800'
-                ]
-            };
-            const category = s.category || 'Groceries';
-            const list = options[category] || ['https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=800'];
-            const idx = (s.shopId || 0) % list.length;
-            img = list[idx];
-        }
+        const img = getShopCoverImage(s);
 
         container.innerHTML = `
             <div class="shop-profile-header mb-4" style="background: linear-gradient(rgba(19, 78, 74, 0.8), rgba(15, 118, 110, 0.9)), url('${img}') center/cover no-repeat">
@@ -983,6 +944,17 @@
             alert('Shop updated successfully!');
         } catch (err) {
             alertEl.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        }
+    }
+
+    // ===== CATEGORY AUTO-IMAGE SELECTION =====
+    function handleCategoryChange(prefix) {
+        const cat = document.getElementById(prefix + '-category').value;
+        const imgEl = document.getElementById(prefix + '-image');
+        if (imgEl) {
+            // Use the first image of the category list as default
+            const list = CATEGORY_DEFAULT_IMAGES[cat] || ['https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=800'];
+            imgEl.value = list[0];
         }
     }
 
