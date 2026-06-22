@@ -107,13 +107,18 @@ The application seeds default data on startup if the database is empty:
 
 ---
 
-## 7. Render Deployment (Docker + MySQL)
+## 7. Render Deployment (Docker + PostgreSQL)
 
 Render supports deploying containerized applications directly using a `Dockerfile`.
 
-### Step 1: Provision a Managed MySQL Database
-1. Go to your Render Dashboard (or another database hosting provider like Clever Cloud, PlanetScale, or Aiven) and provision a managed **MySQL** instance.
-2. Retrieve your database connection host, database name, username, and password.
+### Step 1: Provision a Managed PostgreSQL Database
+1. Go to your Render Dashboard and click **New** -> **PostgreSQL**.
+2. Configure your database details:
+   - **Name**: `villageconnect-db`
+   - **Database**: `villageconnect`
+   - **User**: Leave default or enter a username.
+3. Click **Create Database**.
+4. Once the database is created, note down the **Internal Database URL** (if deploying both in the same Render region) or **External Database URL** (e.g. `postgresql://user:pass@host:port/dbname`). Also retrieve the username and password details.
 
 ### Step 2: Create a Web Service on Render
 1. In the Render Dashboard, click **New** -> **Web Service**.
@@ -129,9 +134,9 @@ In your Render Web Service settings, navigate to the **Environment** tab and add
 
 | Environment Variable | Example/Value |
 | --- | --- |
-| `SPRING_DATASOURCE_URL` | `jdbc:mysql://<your-db-host>:<port>/<db-name>?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC` |
-| `SPRING_DATASOURCE_USERNAME` | `your_database_username` |
-| `SPRING_DATASOURCE_PASSWORD` | `your_database_password` |
+| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://<host>:<port>/<dbname>` (Convert the Render connection URL string into a JDBC URL format starting with `jdbc:postgresql://`) |
+| `SPRING_DATASOURCE_USERNAME` | `your_postgres_username` |
+| `SPRING_DATASOURCE_PASSWORD` | `your_postgres_password` |
 | `GEMINI_API_KEY` | `your_gemini_api_key_here` |
 | `JWT_SECRET` | `A_very_long_secure_custom_jwt_secret_key_for_production` |
 
