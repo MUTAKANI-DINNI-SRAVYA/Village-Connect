@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - VillageConnect</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <!-- Header Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+                <i class="bi bi-shop-window fs-3 text-warning"></i>
+                <span data-translate="appName" class="brand-font">VillageConnect</span>
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <!-- Language Switches -->
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-light" id="btn-lang-en">English</button>
+                    <button type="button" class="btn btn-outline-light" id="btn-lang-te">తెలుగు</button>
+                </div>
+                <a href="index.html" class="btn btn-outline-light btn-sm"><i class="bi bi-arrow-left"></i> <span data-translate="home">Home</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Register Container -->
+    <main class="container my-5 flex-grow-1 d-flex align-items-center justify-content-center">
+        <div class="row w-100 justify-content-center">
+            <div class="col-md-7 col-lg-6">
+                <div class="card glass-panel border-0 shadow-lg p-4">
+                    <div class="text-center mb-4">
+                        <div class="bg-teal text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 70px; height: 70px; background-color: #0f766e;">
+                            <i class="bi bi-person-plus-fill fs-2"></i>
+                        </div>
+                        <h2 class="fw-bold mt-3" data-translate="createAccount">Create an Account</h2>
+                        <p class="text-muted" data-translate="registerSubtitle">Register to discover or manage products</p>
+                    </div>
+
+                    <!-- Alert Container -->
+                    <div id="alert-container"></div>
+
+                    <!-- Register Form -->
+                    <form id="register-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label fw-semibold" data-translate="fullName">Full Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    <input type="text" id="name" class="form-control" data-translate="namePlaceholder" placeholder="Ramesh Kumar" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label fw-semibold" data-translate="phoneNumber">Phone Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                    <input type="tel" id="phone" class="form-control" data-translate="phonePlaceholder" placeholder="9848012345" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-semibold" data-translate="emailAddress">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input type="email" id="email" class="form-control" data-translate="emailPlaceholder" placeholder="name@example.com" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="village" class="form-label fw-semibold">Village / City *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                                <input type="text" id="village" class="form-control" placeholder="Enter your home village or city" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label fw-semibold" data-translate="passwordLabel">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input type="password" id="password" class="form-control" data-translate="passwordRegPlaceholder" placeholder="Min 6 characters" minlength="6" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold" data-translate="selectRole">Select Account Role</label>
+                            <div class="d-flex gap-4 mt-1">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="role" id="role-customer" value="CUSTOMER" checked>
+                                    <label class="form-check-label" for="role-customer">
+                                        <i class="bi bi-person-fill text-teal"></i> <span data-translate="roleCustomer">Customer (Villager)</span>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="role" id="role-owner" value="SHOP_OWNER">
+                                    <label class="form-check-label" for="role-owner">
+                                        <i class="bi bi-shop-window text-warning"></i> <span data-translate="roleOwner">Shop Owner</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3" data-translate="registerNowBtn">Register Now</button>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <p class="mb-0 text-muted"><span data-translate="alreadyHaveAccount">Already have an account?</span> <a href="login.html" class="text-teal fw-semibold" style="color:#0f766e" data-translate="signInHere">Sign In here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center text-lg-start mt-auto py-3">
+        <div class="container text-center">
+            <small>&copy; 2026 VillageConnect. All Rights Reserved.</small>
+        </div>
+    </footer>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Core App JS -->
+    <script src="js/app.js"></script>
+
+    <!-- Register Handler Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const registerForm = document.getElementById('register-form');
+            const alertContainer = document.getElementById('alert-container');
+
+            registerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                alertContainer.innerHTML = ''; // Clear alerts
+
+                const name = document.getElementById('name').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value.trim();
+                const village = document.getElementById('village').value.trim();
+                
+                // Resolve role selection
+                const role = document.querySelector('input[name="role"]:checked').value;
+
+                try {
+                    const data = await apiCall('/auth/register', {
+                        method: 'POST',
+                        body: JSON.stringify({ name, email, phone, password, role, village })
+                    });
+
+                    if (data) {
+                        alertContainer.innerHTML = `
+                            <div class="alert alert-success" role="alert">
+                                <i class="bi bi-check-circle-fill me-2"></i> Account created successfully! Redirecting to login...
+                            </div>
+                        `;
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 2000);
+                    }
+                } catch (err) {
+                    alertContainer.innerHTML = `
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-octagon-fill me-2"></i> ${err.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

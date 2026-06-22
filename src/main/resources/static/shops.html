@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shops Directory - VillageConnect</title>
+    <meta name="description" content="Browse and search all local shops on VillageConnect. Filter by category, village, or product.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+            <i class="bi bi-shop-window fs-3 text-warning"></i>
+            <span data-translate="appName" class="brand-font">VillageConnect</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="index.html" data-translate="home">Home</a></li>
+                <li class="nav-item"><a class="nav-link active" href="shops.html" data-translate="shops">Shops</a></li>
+                <li class="nav-item">
+                    <a class="nav-link text-warning fw-semibold" href="ai-chat.html">
+                        <i class="bi bi-chat-dots-fill"></i> <span data-translate="chatbot">AI Chatbot</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="d-flex align-items-center me-3 mb-2 mb-lg-0">
+                <div class="btn-group btn-group-sm">
+                    <button type="button" class="btn btn-light" id="btn-lang-en">English</button>
+                    <button type="button" class="btn btn-outline-light" id="btn-lang-te">తెలుగు</button>
+                </div>
+            </div>
+            <ul class="navbar-nav" id="navbar-auth-section"></ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container my-5">
+    <div class="row">
+        <!-- Sidebar Filters -->
+        <div class="col-lg-3 mb-4">
+            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+                <h5 class="fw-bold mb-3"><i class="bi bi-funnel text-success"></i> Filters</h5>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-muted">Keyword Search</label>
+                    <div class="input-group">
+                        <input type="text" id="filter-search" class="form-control" placeholder="Search products or shops...">
+                        <button class="btn btn-success" onclick="applyFilters()"><i class="bi bi-search"></i></button>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-muted">Category</label>
+                    <select id="filter-category" class="form-select" onchange="applyFilters()">
+                        <option value="" data-translate="all">All Categories</option>
+                        <option value="Groceries">Groceries</option>
+                        <option value="Agriculture">Agriculture</option>
+                        <option value="Electrical">Electrical</option>
+                        <option value="Medical">Medical</option>
+                        <option value="Clothing">Clothing</option>
+                        <option value="Food & Dining">Food & Dining</option>
+                        <option value="Stationery">Stationery & Books</option>
+                        <option value="Footwear">Footwear</option>
+                        <option value="Mobile Services">Mobile Services</option>
+                        <option value="Tailoring">Tailoring</option>
+                        <option value="Saloon">Saloon</option>
+                        <option value="Dairy & Poultry">Dairy & Poultry</option>
+                        <option value="Automobile">Automobile</option>
+                        <option value="Carpentry">Carpentry</option>
+                        <option value="Construction">Construction</option>
+                        <option value="Veterinary">Veterinary</option>
+                        <option value="Plumbing">Plumbing</option>
+                        <option value="Fruits & Vegetables">Fruits & Vegetables</option>
+                        <option value="Kitchenware">Kitchenware</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-muted">Village</label>
+                    <select id="filter-village" class="form-select" onchange="applyFilters()">
+                        <option value="">All Villages</option>
+                    </select>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm w-100 rounded-3 mt-2" onclick="resetFilters()">
+                    <i class="bi bi-x-circle me-1"></i>Reset Filters
+                </button>
+            </div>
+        </div>
+
+        <!-- Shops Grid -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">Local Business Directories</h2>
+                    <p class="text-muted mb-0" id="results-count">Loading shops...</p>
+                </div>
+            </div>
+
+            <div id="ai-info-box" class="alert alert-info border-0 rounded-4 shadow-sm mb-4 d-none">
+                <i class="bi bi-cpu-fill me-2 text-success"></i>
+                <span id="ai-info-text"></span>
+            </div>
+
+            <!-- View Toggle -->
+            <div class="d-flex gap-2 mb-4">
+                <button class="btn btn-success btn-sm rounded-pill px-3" id="btn-grid-view" onclick="showView('grid')">
+                    <i class="bi bi-grid-3x3-gap-fill me-1"></i> Grid View
+                </button>
+                <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" id="btn-map-view" onclick="showView('map')">
+                    <i class="bi bi-map me-1"></i> Map View
+                </button>
+            </div>
+
+            <!-- Map Container -->
+            <div id="map-container" class="d-none mb-4">
+                <div id="shops-map" style="height: 500px; border-radius: 1rem; overflow: hidden; z-index: 1;"></div>
+            </div>
+
+            <div class="row g-4" id="shops-list-grid">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-success" role="status"></div>
+                    <p class="text-muted mt-2">Loading shops...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="py-4">
+    <div class="container text-center">
+        <hr>
+        <small class="text-white-50">&copy; 2026 VillageConnect. All Rights Reserved.</small>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/app.js"></script>
+<script>
+    let allShops = [];
+    let filteredShops = [];
+
+    const catImages = {
+        'Groceries': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500',
+        'Agriculture': 'https://images.unsplash.com/photo-1589923188900-85dae523342b?w=500',
+        'Electrical': 'https://images.unsplash.com/photo-1558211583-d26f610c1eb1?w=500',
+        'Medical': 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=500',
+        'Clothing': 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=500',
+        'Food & Dining': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500',
+        'Stationery': 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=500',
+        'Footwear': 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500',
+        'Mobile Services': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500',
+        'Tailoring': 'https://images.unsplash.com/photo-1528570228500-2144b24f0169?w=500',
+        'Saloon': 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=500',
+        'Dairy & Poultry': 'https://images.unsplash.com/photo-1527751171053-6ac5ec50000b?w=500',
+        'Automobile': 'https://images.unsplash.com/photo-1486006920555-c77dce18193b?w=500',
+        'Carpentry': 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=500',
+        'Construction': 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=500',
+        'Veterinary': 'https://images.unsplash.com/photo-1581888227599-779811939961?w=500',
+        'Plumbing': 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=500',
+        'Fruits & Vegetables': 'https://images.unsplash.com/photo-1566385101042-1a0aa0c1268c?w=500',
+        'Kitchenware': 'https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?w=500'
+    };
+
+    async function init() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchParam = urlParams.get('search');
+        const catParam = urlParams.get('cat');
+        if (searchParam) document.getElementById('filter-search').value = searchParam;
+        if (catParam) document.getElementById('filter-category').value = catParam;
+
+        await loadShops();
+        populateVillages();
+
+        // Default filter based on logged in user's village
+        if (auth.isAuthenticated() && !searchParam && !catParam) {
+            const user = auth.getUser();
+            if (user && user.village) {
+                const select = document.getElementById('filter-village');
+                const hasOption = Array.from(select.options).some(opt => opt.value === user.village);
+                if (hasOption) {
+                    select.value = user.village;
+                }
+            }
+        }
+
+        applyFilters();
+    }
+
+    async function loadShops() {
+        try {
+            allShops = await apiCall('/shops');
+            filteredShops = [...allShops];
+        } catch (err) {
+            document.getElementById('shops-list-grid').innerHTML = `
+                <div class="col-12 text-center text-danger py-5">
+                    <i class="bi bi-exclamation-triangle-fill fs-1 d-block mb-2"></i>
+                    Failed to load shops: ${err.message}
+                </div>`;
+        }
+    }
+
+    function populateVillages() {
+        const select = document.getElementById('filter-village');
+        const villages = [...new Set(allShops.map(s => s.village))].sort();
+        villages.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v; opt.innerText = v;
+            select.appendChild(opt);
+        });
+    }
+
+    async function applyFilters() {
+        const search = document.getElementById('filter-search').value.trim();
+        const category = document.getElementById('filter-category').value;
+        const village = document.getElementById('filter-village').value;
+        const infoBox = document.getElementById('ai-info-box');
+        infoBox.classList.add('d-none');
+
+        if (search) {
+            document.getElementById('results-count').innerText = 'Searching...';
+            try {
+                const products = await apiCall(`/products?query=${encodeURIComponent(search)}`);
+                const matchingShopIds = [...new Set(products.map(p => p.shopId))];
+                filteredShops = allShops.filter(shop => {
+                    return matchingShopIds.includes(shop.shopId) ||
+                        shop.shopName.toLowerCase().includes(search.toLowerCase()) ||
+                        (shop.description || '').toLowerCase().includes(search.toLowerCase());
+                });
+                if (products.length > 0 && !allShops.some(s => s.shopName.toLowerCase().includes(search.toLowerCase()))) {
+                    infoBox.classList.remove('d-none');
+                    document.getElementById('ai-info-text').innerText = `AI-powered search expanded "${search}" to find matching products across all shops.`;
+                }
+            } catch {
+                filteredShops = allShops.filter(s =>
+                    s.shopName.toLowerCase().includes(search.toLowerCase()) ||
+                    (s.description || '').toLowerCase().includes(search.toLowerCase())
+                );
+            }
+        } else {
+            filteredShops = [...allShops];
+        }
+
+        if (category) filteredShops = filteredShops.filter(s => s.category === category);
+        if (village)  filteredShops = filteredShops.filter(s => s.village === village);
+        renderShopsGrid();
+    }
+
+    function resetFilters() {
+        document.getElementById('filter-search').value = '';
+        document.getElementById('filter-category').value = '';
+        document.getElementById('filter-village').value = '';
+        filteredShops = [...allShops];
+        document.getElementById('ai-info-box').classList.add('d-none');
+        renderShopsGrid();
+    }
+
+    function renderShopsGrid() {
+        const grid = document.getElementById('shops-list-grid');
+        document.getElementById('results-count').innerText = `Found ${filteredShops.length} shop${filteredShops.length !== 1 ? 's' : ''}`;
+
+        if (!filteredShops.length) {
+            grid.innerHTML = `<div class="col-12 text-center py-5 text-muted">
+                <i class="bi bi-shop fs-1 d-block mb-2"></i>No shops match your filters.</div>`;
+            return;
+        }
+
+        grid.innerHTML = filteredShops.map(shop => {
+            const img = catImages[shop.category] || 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=500';
+            return `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card vc-card h-100">
+                        <img src="${img}" class="card-img-top" alt="${shop.shopName}">
+                        <div class="card-body d-flex flex-column">
+                            <span class="badge-category mb-2 d-inline-block">${shop.category}</span>
+                            <h5 class="card-title fw-bold mb-1">${shop.shopName}</h5>
+                            <p class="card-text text-muted mb-2 small"><i class="bi bi-geo-alt-fill text-danger"></i> ${shop.village}</p>
+                            <p class="card-text mb-3 text-muted small line-clamp-3">${shop.description || 'A trusted local business.'}</p>
+                            <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+                                <small class="text-muted"><i class="bi bi-person-fill"></i> ${shop.ownerName}</small>
+                                <a href="shop-details.html?id=${shop.shopId}" class="btn btn-primary btn-sm px-3 rounded-pill">Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+    document.getElementById('filter-search').addEventListener('keydown', e => { if (e.key === 'Enter') applyFilters(); });
+
+    let shopsMap = null;
+    let mapMarkers = [];
+
+
+    function showView(view) {
+        const gridContainer = document.getElementById('shops-list-grid');
+        const mapContainer = document.getElementById('map-container');
+        const btnGrid = document.getElementById('btn-grid-view');
+        const btnMap = document.getElementById('btn-map-view');
+
+        if (view === 'map') {
+            gridContainer.classList.add('d-none');
+            mapContainer.classList.remove('d-none');
+            btnMap.className = 'btn btn-success btn-sm rounded-pill px-3';
+            btnGrid.className = 'btn btn-outline-secondary btn-sm rounded-pill px-3';
+            renderShopsMap();
+        } else {
+            gridContainer.classList.remove('d-none');
+            mapContainer.classList.add('d-none');
+            btnGrid.className = 'btn btn-success btn-sm rounded-pill px-3';
+            btnMap.className = 'btn btn-outline-secondary btn-sm rounded-pill px-3';
+        }
+    }
+
+    function renderShopsMap() {
+        if (!shopsMap) {
+            shopsMap = L.map('shops-map').setView([17.385, 78.4867], 10);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 19
+            }).addTo(shopsMap);
+        }
+
+        // Clear existing markers
+        mapMarkers.forEach(m => shopsMap.removeLayer(m));
+        mapMarkers = [];
+
+        const bounds = [];
+        filteredShops.forEach(shop => {
+            if (shop.latitude && shop.longitude) {
+                const marker = L.marker([shop.latitude, shop.longitude]).addTo(shopsMap);
+                marker.bindPopup(`
+                    <strong>${shop.shopName}</strong><br>
+                    <small class="text-muted">${shop.category}</small><br>
+                    <i class="bi bi-geo-alt"></i> ${shop.village}<br>
+                    <a href="shop-details.html?id=${shop.shopId}" class="btn btn-sm btn-primary mt-1 rounded-pill px-3">View Details</a>
+                `);
+                mapMarkers.push(marker);
+                bounds.push([shop.latitude, shop.longitude]);
+            }
+        });
+
+        if (bounds.length > 0) {
+            shopsMap.fitBounds(bounds, { padding: [30, 30] });
+        }
+        setTimeout(() => shopsMap.invalidateSize(), 300);
+    }
+</script>
+</body>
+</html>

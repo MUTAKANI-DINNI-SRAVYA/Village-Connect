@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VillageConnect — Local Shops & Services</title>
+    <meta name="description" content="VillageConnect helps you discover local shops, products, and services in your village. Search, order, and connect.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+            <i class="bi bi-shop-window fs-3 text-warning"></i>
+            <span data-translate="appName" class="brand-font">VillageConnect</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link active" href="index.html" data-translate="home">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="shops.html" data-translate="shops">Shops</a></li>
+                <li class="nav-item">
+                    <a class="nav-link text-warning fw-semibold" href="ai-chat.html">
+                        <i class="bi bi-chat-dots-fill"></i> <span data-translate="chatbot">AI Chatbot</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="d-flex align-items-center me-3 mb-2 mb-lg-0">
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-light" id="btn-lang-en">English</button>
+                    <button type="button" class="btn btn-outline-light" id="btn-lang-te">తెలుగు</button>
+                </div>
+            </div>
+            <ul class="navbar-nav" id="navbar-auth-section"></ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container text-center">
+        <div class="mb-3">
+            <span class="badge bg-warning text-dark fw-semibold px-3 py-2 rounded-pill fs-6">
+                <i class="bi bi-geo-alt-fill me-1"></i> Your Village Marketplace
+            </span>
+        </div>
+        <h1 class="display-4 fw-bold mb-3">Discover Local Shops<br>& Services Near You</h1>
+        <p class="lead opacity-75 mb-4">Connect with trusted local businesses. Order products, book services, and support your village economy.</p>
+
+        <!-- Search Bar -->
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="input-group hero-search shadow-lg">
+                    <input type="text" id="hero-search-input" class="form-control form-control-lg" placeholder="Search shops, products, services...">
+                    <button class="btn btn-warning fw-bold px-4" onclick="heroSearch()">
+                        <i class="bi bi-search me-1"></i> Search
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Category Chips -->
+        <div class="mt-4 d-flex flex-wrap gap-2 justify-content-center">
+            <a href="shops.html?cat=Groceries" class="btn btn-outline-light btn-sm rounded-pill"><i class="bi bi-basket2 me-1"></i>Groceries</a>
+            <a href="shops.html?cat=Medical" class="btn btn-outline-light btn-sm rounded-pill"><i class="bi bi-hospital me-1"></i>Medical</a>
+            <a href="shops.html?cat=Agriculture" class="btn btn-outline-light btn-sm rounded-pill"><i class="bi bi-tree me-1"></i>Agriculture</a>
+            <a href="shops.html?cat=Food+%26+Dining" class="btn btn-outline-light btn-sm rounded-pill"><i class="bi bi-cup-hot me-1"></i>Food & Dining</a>
+            <a href="shops.html?cat=Electrical" class="btn btn-outline-light btn-sm rounded-pill"><i class="bi bi-lightning-charge me-1"></i>Electrical</a>
+            <a href="shops.html" class="btn btn-warning btn-sm rounded-pill fw-semibold"><i class="bi bi-grid me-1"></i>All Shops</a>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Bar -->
+<div class="bg-white py-4 border-bottom shadow-sm">
+    <div class="container">
+        <div class="row g-3 text-center" id="stats-row">
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-success bg-opacity-10 text-success mx-auto"><i class="bi bi-shop"></i></div>
+                    <h3 class="fw-bold mb-0" id="stat-shops">—</h3>
+                    <p class="text-muted small mb-0">Local Shops</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-warning bg-opacity-10 text-warning mx-auto"><i class="bi bi-box-seam"></i></div>
+                    <h3 class="fw-bold mb-0" id="stat-products">—</h3>
+                    <p class="text-muted small mb-0">Products Listed</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-info bg-opacity-10 text-info mx-auto"><i class="bi bi-people"></i></div>
+                    <h3 class="fw-bold mb-0" id="stat-users">—</h3>
+                    <p class="text-muted small mb-0">Registered Users</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-danger bg-opacity-10 text-danger mx-auto"><i class="bi bi-chat-left-quote"></i></div>
+                    <h3 class="fw-bold mb-0" id="stat-requests">—</h3>
+                    <p class="text-muted small mb-0">Product Requests</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Shops Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="section-title mb-1">Featured Shops</h2>
+                <p class="section-subtitle">Trusted local businesses in your area</p>
+            </div>
+            <a href="shops.html" class="btn btn-outline-success rounded-pill px-4">View All <i class="bi bi-arrow-right ms-1"></i></a>
+        </div>
+        <div class="row g-4" id="featured-shops-grid">
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-success" role="status"></div>
+                <p class="text-muted mt-2">Loading shops...</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">How VillageConnect Works</h2>
+            <p class="section-subtitle">Simple steps to connect with your local marketplace</p>
+        </div>
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="p-4">
+                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:72px;height:72px;font-size:2rem">
+                        <i class="bi bi-search"></i>
+                    </div>
+                    <h5 class="fw-bold">1. Search & Discover</h5>
+                    <p class="text-muted small">Browse or search for shops by category, village, or product name. Use our AI-powered search in English or Telugu.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4">
+                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:72px;height:72px;font-size:2rem">
+                        <i class="bi bi-bag-plus"></i>
+                    </div>
+                    <h5 class="fw-bold">2. Order Products</h5>
+                    <p class="text-muted small">Place orders directly with shop owners. Track your order status and get notified on updates.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4">
+                    <div class="bg-info bg-opacity-10 text-info rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:72px;height:72px;font-size:2rem">
+                        <i class="bi bi-star"></i>
+                    </div>
+                    <h5 class="fw-bold">3. Review & Connect</h5>
+                    <p class="text-muted small">Leave ratings and reviews. Help your community discover the best local shops and services.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h2 class="section-title">Browse by Category</h2>
+            <p class="section-subtitle">Find exactly what you need</p>
+        </div>
+        <div class="row g-3">
+            <div class="col-6 col-md-3 col-lg-2" onclick="window.location='shops.html?cat=Groceries'">
+                <div class="card border-0 shadow-sm text-center p-3 h-100 vc-card" style="cursor:pointer">
+                    <div class="fs-2 mb-2">🛒</div><small class="fw-semibold">Groceries</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2" onclick="window.location='shops.html?cat=Agriculture'">
+                <div class="card border-0 shadow-sm text-center p-3 h-100 vc-card" style="cursor:pointer">
+                    <div class="fs-2 mb-2">🌾</div><small class="fw-semibold">Agriculture</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2" onclick="window.location='shops.html?cat=Medical'">
+                <div class="card border-0 shadow-sm text-center p-3 h-100 vc-card" style="cursor:pointer">
+                    <div class="fs-2 mb-2">💊</div><small class="fw-semibold">Medical</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2" onclick="window.location='shops.html?cat=Electrical'">
+                <div class="card border-0 shadow-sm text-center p-3 h-100 vc-card" style="cursor:pointer">
+                    <div class="fs-2 mb-2">⚡</div><small class="fw-semibold">Electrical</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2" onclick="window.location='shops.html?cat=Clothing'">
+                <div class="card border-0 shadow-sm text-center p-3 h-100 vc-card" style="cursor:pointer">
+                    <div class="fs-2 mb-2">👕</div><small class="fw-semibold">Clothing</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2" onclick="window.location='shops.html?cat=Food+%26+Dining'">
+                <div class="card border-0 shadow-sm text-center p-3 h-100 vc-card" style="cursor:pointer">
+                    <div class="fs-2 mb-2">🍛</div><small class="fw-semibold">Food & Dining</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2" onclick="window.location='shops.html?cat=Dairy+%26+Poultry'">
+                <div class="card border-0 shadow-sm text-center p-3 h-100 vc-card" style="cursor:pointer">
+                    <div class="fs-2 mb-2">🥛</div><small class="fw-semibold">Dairy & Poultry</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2" onclick="window.location='shops.html?cat=Automobile'">
+                <div class="card border-0 shadow-sm text-center p-3 h-100 vc-card" style="cursor:pointer">
+                    <div class="fs-2 mb-2">🔧</div><small class="fw-semibold">Automobile</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2" onclick="window.location='shops.html?cat=Saloon'">
+                <div class="card border-0 shadow-sm text-center p-3 h-100 vc-card" style="cursor:pointer">
+                    <div class="fs-2 mb-2">✂️</div><small class="fw-semibold">Saloon</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2" onclick="window.location='shops.html?cat=Tailoring'">
+                <div class="card border-0 shadow-sm text-center p-3 h-100 vc-card" style="cursor:pointer">
+                    <div class="fs-2 mb-2">🧵</div><small class="fw-semibold">Tailoring</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2" onclick="window.location='shops.html?cat=Footwear'">
+                <div class="card border-0 shadow-sm text-center p-3 h-100 vc-card" style="cursor:pointer">
+                    <div class="fs-2 mb-2">👟</div><small class="fw-semibold">Footwear</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2" onclick="window.location='shops.html'">
+                <div class="card border-0 shadow-sm text-center p-3 h-100 vc-card bg-success text-white" style="cursor:pointer">
+                    <div class="fs-2 mb-2">🏪</div><small class="fw-semibold">All Shops</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- AI Chatbot CTA -->
+<section class="py-5" style="background: linear-gradient(135deg, #134e4a, #0f766e);">
+    <div class="container text-center text-white">
+        <i class="bi bi-cpu-fill fs-1 text-warning mb-3 d-block"></i>
+        <h2 class="fw-bold mb-2">Can't find what you're looking for?</h2>
+        <p class="opacity-75 mb-4">Ask our AI Assistant in English or Telugu! It'll find the right shops and products for you.</p>
+        <a href="ai-chat.html" class="btn btn-warning btn-lg rounded-pill px-5 fw-bold">
+            <i class="bi bi-chat-dots-fill me-2"></i> Chat with AI
+        </a>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="py-4">
+    <div class="container text-center">
+        <div class="d-flex justify-content-center gap-4 mb-3">
+            <a href="index.html" class="text-white-50 small text-decoration-none">Home</a>
+            <a href="shops.html" class="text-white-50 small text-decoration-none">Shops</a>
+            <a href="ai-chat.html" class="text-white-50 small text-decoration-none">AI Chat</a>
+            <a href="register.html" class="text-white-50 small text-decoration-none">Register</a>
+        </div>
+        <hr>
+        <small class="text-white-50">&copy; 2026 VillageConnect. All Rights Reserved.</small>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+<script>
+    const catImages = {
+        'Groceries': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500',
+        'Agriculture': 'https://images.unsplash.com/photo-1589923188900-85dae523342b?w=500',
+        'Electrical': 'https://images.unsplash.com/photo-1558211583-d26f610c1eb1?w=500',
+        'Medical': 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=500',
+        'Clothing': 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=500',
+        'Food & Dining': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500',
+        'Stationery': 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=500',
+        'Footwear': 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500',
+        'Mobile Services': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500',
+        'Tailoring': 'https://images.unsplash.com/photo-1528570228500-2144b24f0169?w=500',
+        'Saloon': 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=500',
+        'Dairy & Poultry': 'https://images.unsplash.com/photo-1527751171053-6ac5ec50000b?w=500',
+        'Automobile': 'https://images.unsplash.com/photo-1486006920555-c77dce18193b?w=500',
+        'Carpentry': 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=500',
+        'Construction': 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=500',
+        'Veterinary': 'https://images.unsplash.com/photo-1581888227599-779811939961?w=500',
+        'Plumbing': 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=500',
+        'Fruits & Vegetables': 'https://images.unsplash.com/photo-1566385101042-1a0aa0c1268c?w=500',
+        'Kitchenware': 'https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?w=500'
+    };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Load featured shops (first 6)
+        try {
+            const shops = await apiCall('/shops');
+            renderFeaturedShops(shops.slice(0, 6));
+            document.getElementById('stat-shops').innerText = shops.length;
+        } catch (e) {
+            document.getElementById('featured-shops-grid').innerHTML = '<div class="col-12 text-center text-muted py-4">Could not load shops.</div>';
+        }
+
+        // Load admin stats for product/user counts
+        try {
+            const products = await apiCall('/products');
+            document.getElementById('stat-products').innerText = products.length;
+        } catch (_) {}
+    });
+
+    function renderFeaturedShops(shops) {
+        const grid = document.getElementById('featured-shops-grid');
+        if (!shops.length) {
+            grid.innerHTML = '<div class="col-12 text-center text-muted py-4"><i class="bi bi-shop fs-1 d-block mb-2"></i>No shops registered yet.</div>';
+            return;
+        }
+        grid.innerHTML = shops.map(shop => {
+            const img = catImages[shop.category] || 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=500';
+            return `
+                <div class="col-md-6 col-lg-4 fade-in-up">
+                    <div class="card vc-card h-100">
+                        <img src="${img}" class="card-img-top" alt="${shop.shopName}" style="height:180px;object-fit:cover">
+                        <div class="card-body d-flex flex-column">
+                            <span class="badge-category mb-2 d-inline-block">${shop.category}</span>
+                            <h5 class="fw-bold mb-1">${shop.shopName}</h5>
+                            <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger"></i> ${shop.village}</p>
+                            <p class="text-muted small mb-3 line-clamp-2">${shop.description || 'A trusted local business.'}</p>
+                            <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+                                <small class="text-muted"><i class="bi bi-person-fill"></i> ${shop.ownerName}</small>
+                                <a href="shop-details.html?id=${shop.shopId}" class="btn btn-primary btn-sm rounded-pill px-3">Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
+    function heroSearch() {
+        const q = document.getElementById('hero-search-input').value.trim();
+        if (q) window.location.href = `shops.html?search=${encodeURIComponent(q)}`;
+        else window.location.href = 'shops.html';
+    }
+
+    document.getElementById('hero-search-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') heroSearch();
+    });
+</script>
+</body>
+</html>

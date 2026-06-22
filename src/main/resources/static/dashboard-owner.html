@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Owner Dashboard - VillageConnect</title>
+    <meta name="description" content="Manage your shops, products, services, orders and revenue on VillageConnect.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="css/styles.css" rel="stylesheet">
+    <style>
+        .tab-btn { border:none; background:none; padding:.75rem 1.25rem; color:#6b7280; font-size:.9rem; cursor:pointer; border-bottom:3px solid transparent; transition:all .2s; }
+        .tab-btn:hover { color:#0f766e; }
+        .tab-btn.active-tab { border-bottom:3px solid #0f766e; color:#0f766e; font-weight:700; }
+        .section-panel { display:none; }
+        .section-panel.active { display:block; }
+        .stat-icon { width:52px;height:52px;border-radius:.75rem;display:inline-flex;align-items:center;justify-content:center;font-size:1.5rem; }
+        .revenue-card { background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%); color:white; }
+        .low-stock-badge { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+        .quick-stock-input { width:70px; }
+        .shop-profile-header { background: linear-gradient(135deg, #134e4a 0%, #0f766e 100%); color:white; border-radius:1rem; padding:2rem; }
+        .order-detail-row td { font-size: 0.85rem; }
+        .review-star { color: #facc15; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+            <i class="bi bi-shop-window fs-3 text-warning"></i>
+            <span class="brand-font">VillageConnect</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="shops.html">Shops</a></li>
+            </ul>
+            <ul class="navbar-nav" id="navbar-auth-section"></ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-1">Shop Owner Dashboard</h1>
+            <p class="text-muted">Manage your shops, products, services, orders & revenue</p>
+        </div>
+        <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill text-uppercase">Shop Owner</span>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-4 rounded-4 text-center revenue-card">
+                <div class="stat-icon bg-white bg-opacity-25 text-white mx-auto mb-2"><i class="bi bi-currency-rupee fs-3"></i></div>
+                <h3 class="fw-bold mb-0" id="stat-revenue">₹0</h3>
+                <p class="small mb-0 opacity-75">Total Revenue</p>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-4 rounded-4 text-center bg-white">
+                <div class="stat-icon bg-warning bg-opacity-10 text-warning mx-auto mb-2"><i class="bi bi-clock-history fs-3"></i></div>
+                <h3 class="fw-bold mb-0" id="stat-pending">0</h3>
+                <p class="text-muted small mb-0">Pending Orders</p>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-4 rounded-4 text-center bg-white">
+                <div class="stat-icon bg-success bg-opacity-10 text-success mx-auto mb-2"><i class="bi bi-box-seam fs-3"></i></div>
+                <h3 class="fw-bold mb-0" id="stat-products">0</h3>
+                <p class="text-muted small mb-0">Total Products</p>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-4 rounded-4 text-center bg-white">
+                <div class="stat-icon bg-danger bg-opacity-10 text-danger mx-auto mb-2"><i class="bi bi-exclamation-triangle fs-3"></i></div>
+                <h3 class="fw-bold mb-0" id="stat-lowstock">0</h3>
+                <p class="text-muted small mb-0">Low Stock Items</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shop Selector -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white mb-4 p-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+                <label class="fw-semibold mb-0">Active Shop:</label>
+                <select class="form-select w-auto" id="shop-selector" onchange="onShopChange()">
+                    <option value="">Loading...</option>
+                </select>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary rounded-pill px-3" onclick="viewMyShopPublic()">
+                    <i class="bi bi-eye me-1"></i> View Public Page
+                </button>
+                <button class="btn btn-success rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addShopModal">
+                    <i class="bi bi-plus-lg me-1"></i> New Shop
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs Panel -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white">
+        <div class="card-header bg-transparent border-bottom d-flex flex-wrap gap-1 p-0 px-4">
+            <button class="tab-btn active-tab" onclick="switchTab('products', this)"><i class="bi bi-box-seam me-1"></i>Products</button>
+            <button class="tab-btn" onclick="switchTab('services', this)"><i class="bi bi-gear me-1"></i>Services</button>
+            <button class="tab-btn" onclick="switchTab('orders', this)"><i class="bi bi-bag-check me-1"></i>Orders</button>
+            <button class="tab-btn" onclick="switchTab('requests', this)"><i class="bi bi-chat-left-quote me-1"></i>Requests</button>
+            <button class="tab-btn" onclick="switchTab('reviews', this)"><i class="bi bi-star me-1"></i>Reviews</button>
+            <button class="tab-btn" onclick="switchTab('shopprofile', this)"><i class="bi bi-shop me-1"></i>My Shop</button>
+        </div>
+        <div class="card-body p-4">
+
+            <!-- Products Panel -->
+            <div id="panel-products" class="section-panel active">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Products</h5>
+                    <button class="btn btn-sm btn-success rounded-pill" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                        <i class="bi bi-plus-lg me-1"></i> Add Product
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle small">
+                        <thead class="table-light">
+                            <tr><th>Name</th><th>Price</th><th>Stock</th><th>Category</th><th>Quick Stock</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="products-table-body">
+                            <tr><td colspan="6" class="text-center py-3"><div class="spinner-border spinner-border-sm text-success"></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Services Panel -->
+            <div id="panel-services" class="section-panel">
+                <div class="d-flex justify-content-between mb-3">
+                    <h5 class="fw-bold mb-0">Services Offered</h5>
+                    <button class="btn btn-sm btn-success rounded-pill" data-bs-toggle="modal" data-bs-target="#addServiceModal">
+                        <i class="bi bi-plus-lg me-1"></i> Add Service
+                    </button>
+                </div>
+                <div id="services-list">
+                    <div class="text-center py-4"><div class="spinner-border spinner-border-sm text-success"></div></div>
+                </div>
+            </div>
+
+            <!-- Orders Panel -->
+            <div id="panel-orders" class="section-panel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Incoming Orders</h5>
+                    <div class="d-flex gap-2">
+                        <select class="form-select form-select-sm w-auto" id="order-filter" onchange="loadOrders()">
+                            <option value="">All Statuses</option>
+                            <option value="PENDING">Pending</option>
+                            <option value="CONFIRMED">Confirmed</option>
+                            <option value="DELIVERED">Delivered</option>
+                            <option value="CANCELLED">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle small">
+                        <thead class="table-light">
+                            <tr><th>ID</th><th>Customer</th><th>Phone</th><th>Product</th><th>Qty</th><th>Total</th><th>Payment</th><th>Date</th><th>Status</th><th>Action</th></tr>
+                        </thead>
+                        <tbody id="orders-table-body">
+                            <tr><td colspan="10" class="text-center py-3"><div class="spinner-border spinner-border-sm text-success"></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Requests Panel -->
+            <div id="panel-requests" class="section-panel">
+                <h5 class="fw-bold mb-3">Customer Product Requests</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle small">
+                        <thead class="table-light">
+                            <tr><th>ID</th><th>Product</th><th>Customer</th><th>Qty</th><th>Status</th><th>Action</th></tr>
+                        </thead>
+                        <tbody id="requests-table-body">
+                            <tr><td colspan="6" class="text-center py-3"><div class="spinner-border spinner-border-sm text-success"></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Reviews Panel -->
+            <div id="panel-reviews" class="section-panel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Customer Reviews</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fs-4 fw-bold text-warning" id="review-avg-rating">0.0</span>
+                        <div id="review-avg-stars"></div>
+                        <small class="text-muted" id="review-total-count">(0 reviews)</small>
+                    </div>
+                </div>
+                <div id="reviews-list-owner">
+                    <div class="text-center py-4"><div class="spinner-border spinner-border-sm text-success"></div></div>
+                </div>
+            </div>
+
+            <!-- Shop Profile Panel -->
+            <div id="panel-shopprofile" class="section-panel">
+                <div id="shop-profile-content">
+                    <div class="text-center py-4"><div class="spinner-border spinner-border-sm text-success"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Add Shop Modal -->
+<div class="modal fade" id="addShopModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-4">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Register New Shop</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label small fw-semibold">Shop Name *</label><input type="text" id="ns-name" class="form-control" placeholder="e.g. Sri Ram Kirana Store"></div>
+                    <div class="col-md-6"><label class="form-label small fw-semibold">Owner Name *</label><input type="text" id="ns-owner" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label small fw-semibold">Phone *</label><input type="tel" id="ns-phone" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label small fw-semibold">Village *</label><input type="text" id="ns-village" class="form-control"></div>
+                    <div class="col-12"><label class="form-label small fw-semibold">Address *</label><input type="text" id="ns-address" class="form-control"></div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Category *</label>
+                        <select id="ns-category" class="form-select">
+                            <option value="Groceries">Groceries</option><option value="Agriculture">Agriculture</option>
+                            <option value="Medical">Medical</option><option value="Electrical">Electrical</option>
+                            <option value="Clothing">Clothing</option><option value="Food & Dining">Food & Dining</option>
+                            <option value="Stationery">Stationery</option><option value="Footwear">Footwear</option>
+                            <option value="Mobile Services">Mobile Services</option><option value="Tailoring">Tailoring</option>
+                            <option value="Saloon">Saloon</option><option value="Dairy & Poultry">Dairy & Poultry</option>
+                            <option value="Automobile">Automobile</option><option value="Carpentry">Carpentry</option>
+                            <option value="Construction">Construction</option><option value="Veterinary">Veterinary</option>
+                            <option value="Plumbing">Plumbing</option><option value="Fruits & Vegetables">Fruits & Vegetables</option>
+                            <option value="Kitchenware">Kitchenware</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold">Latitude</label>
+                        <input type="number" id="ns-lat" class="form-control" step="any" value="17.3850">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold">Longitude</label>
+                        <input type="number" id="ns-lng" class="form-control" step="any" value="78.4867">
+                    </div>
+                    <div class="col-12">
+                        <button type="button" class="btn btn-outline-info btn-sm rounded-pill" onclick="getMyLocation('ns')">
+                            <i class="bi bi-crosshair me-1"></i> Use My Current Location
+                        </button>
+                    </div>
+                    <div class="col-12">
+                        <div id="ns-map-preview" style="height:200px; border-radius:1rem; overflow:hidden; z-index:1;"></div>
+                    </div>
+                    <div class="col-12"><label class="form-label small fw-semibold">Description</label><textarea id="ns-desc" class="form-control" rows="2"></textarea></div>
+                </div>
+                <div id="shop-form-alert" class="mt-3"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-success rounded-pill px-4" onclick="createShop()">Create Shop</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Add Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3"><label class="form-label small fw-semibold">Product Name *</label><input type="text" id="np-name" class="form-control"></div>
+                <div class="row g-3">
+                    <div class="col-6"><label class="form-label small fw-semibold">Price (₹) *</label><input type="number" id="np-price" class="form-control" step="0.01"></div>
+                    <div class="col-6"><label class="form-label small fw-semibold">Quantity *</label><input type="number" id="np-qty" class="form-control"></div>
+                </div>
+                <div class="mt-3"><label class="form-label small fw-semibold">Category</label><input type="text" id="np-cat" class="form-control"></div>
+                <div class="mt-3"><label class="form-label small fw-semibold">Description</label><textarea id="np-desc" class="form-control" rows="2"></textarea></div>
+                <div id="product-form-alert" class="mt-3"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-success rounded-pill px-4" onclick="addProduct()">Add Product</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div class="modal fade" id="editProductModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Edit Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="ep-id">
+                <div class="mb-3"><label class="form-label small fw-semibold">Product Name *</label><input type="text" id="ep-name" class="form-control"></div>
+                <div class="row g-3">
+                    <div class="col-6"><label class="form-label small fw-semibold">Price (₹) *</label><input type="number" id="ep-price" class="form-control" step="0.01"></div>
+                    <div class="col-6"><label class="form-label small fw-semibold">Quantity *</label><input type="number" id="ep-qty" class="form-control"></div>
+                </div>
+                <div class="mt-3"><label class="form-label small fw-semibold">Category</label><input type="text" id="ep-cat" class="form-control"></div>
+                <div class="mt-3"><label class="form-label small fw-semibold">Description</label><textarea id="ep-desc" class="form-control" rows="2"></textarea></div>
+                <div id="edit-product-alert" class="mt-3"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary rounded-pill px-4" onclick="saveEditProduct()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Shop Modal -->
+<div class="modal fade" id="editShopModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-4">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Edit Shop Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label small fw-semibold">Shop Name *</label><input type="text" id="es-name" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label small fw-semibold">Owner Name *</label><input type="text" id="es-owner" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label small fw-semibold">Phone *</label><input type="tel" id="es-phone" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label small fw-semibold">Village *</label><input type="text" id="es-village" class="form-control"></div>
+                    <div class="col-12"><label class="form-label small fw-semibold">Address *</label><input type="text" id="es-address" class="form-control"></div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Category *</label>
+                        <select id="es-category" class="form-select">
+                            <option value="Groceries">Groceries</option><option value="Agriculture">Agriculture</option>
+                            <option value="Medical">Medical</option><option value="Electrical">Electrical</option>
+                            <option value="Clothing">Clothing</option><option value="Food & Dining">Food & Dining</option>
+                            <option value="Stationery">Stationery</option><option value="Footwear">Footwear</option>
+                            <option value="Mobile Services">Mobile Services</option><option value="Tailoring">Tailoring</option>
+                            <option value="Saloon">Saloon</option><option value="Dairy & Poultry">Dairy & Poultry</option>
+                            <option value="Automobile">Automobile</option><option value="Carpentry">Carpentry</option>
+                            <option value="Construction">Construction</option><option value="Veterinary">Veterinary</option>
+                            <option value="Plumbing">Plumbing</option><option value="Fruits & Vegetables">Fruits & Vegetables</option>
+                            <option value="Kitchenware">Kitchenware</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3"><label class="form-label small fw-semibold">Latitude</label><input type="number" id="es-lat" class="form-control" step="any"></div>
+                    <div class="col-md-3"><label class="form-label small fw-semibold">Longitude</label><input type="number" id="es-lng" class="form-control" step="any"></div>
+                    <div class="col-12">
+                        <button type="button" class="btn btn-outline-info btn-sm rounded-pill" onclick="getMyLocation('es')">
+                            <i class="bi bi-crosshair me-1"></i> Use My Current Location
+                        </button>
+                    </div>
+                    <div class="col-12"><label class="form-label small fw-semibold">Description</label><textarea id="es-desc" class="form-control" rows="2"></textarea></div>
+                </div>
+                <div id="edit-shop-alert" class="mt-3"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary rounded-pill px-4" onclick="saveEditShop()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Service Modal -->
+<div class="modal fade" id="addServiceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Add Service</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3"><label class="form-label small fw-semibold">Service Name *</label><input type="text" id="nsvc-name" class="form-control"></div>
+                <div class="mb-3"><label class="form-label small fw-semibold">Description</label><textarea id="nsvc-desc" class="form-control" rows="2"></textarea></div>
+                <div id="service-form-alert" class="mt-3"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-success rounded-pill px-4" onclick="addService()">Add Service</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="py-4">
+    <div class="container text-center">
+        <hr><small class="text-white-50">&copy; 2026 VillageConnect. All Rights Reserved.</small>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/app.js"></script>
+<script>
+    let myShops = [];
+    let activeShopId = null;
+    let activeShopData = null;
+    let allOrdersForShop = [];
+    let allProductsForShop = [];
+    const STATUS_COLORS = { PENDING:'warning', CONFIRMED:'info', DELIVERED:'success', CANCELLED:'danger' };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!auth.isAuthenticated()) { window.location.href = 'login.html'; return; }
+        const user = auth.getUser();
+        if (user && user.role === 'ADMIN') { window.location.href = 'dashboard-admin.html'; return; }
+        if (user && user.role === 'CUSTOMER') { window.location.href = 'dashboard-customer.html'; return; }
+
+        // Pre-fill owner name from logged in user
+        const currentUser = auth.getUser();
+        if (currentUser) {
+            document.getElementById('ns-owner').value = currentUser.name || '';
+            document.getElementById('ns-phone').value = currentUser.phone || '';
+        }
+
+        await loadShops();
+        initNewShopMap();
+    });
+
+    // ===== SHOP LOADING =====
+    async function loadShops() {
+        try {
+            myShops = await apiCall('/shops/owner');
+            const sel = document.getElementById('shop-selector');
+            if (!myShops.length) {
+                sel.innerHTML = '<option value="">No shops yet — create one!</option>';
+                return;
+            }
+            sel.innerHTML = myShops.map(s => `<option value="${s.shopId}">${s.shopName}</option>`).join('');
+            activeShopId = myShops[0].shopId;
+            activeShopData = myShops[0];
+            await loadShopData();
+        } catch (err) {
+            console.error('Failed to load shops', err);
+        }
+    }
+
+    async function onShopChange() {
+        activeShopId = parseInt(document.getElementById('shop-selector').value);
+        activeShopData = myShops.find(s => s.shopId === activeShopId) || null;
+        if (activeShopId) await loadShopData();
+    }
+
+    async function loadShopData() {
+        await Promise.all([loadProducts(), loadServices(), loadOrders(), loadRequests(), loadReviews(), loadShopProfile()]);
+        updateStats();
+    }
+
+    function viewMyShopPublic() {
+        if (activeShopId) window.open(`shop-details.html?id=${activeShopId}`, '_blank');
+    }
+
+    // ===== STATS =====
+    function updateStats() {
+        // Revenue: sum of DELIVERED orders
+        const totalRevenue = allOrdersForShop
+            .filter(o => o.status === 'DELIVERED')
+            .reduce((sum, o) => sum + parseFloat(o.totalAmount || 0), 0);
+        document.getElementById('stat-revenue').innerText = `₹${totalRevenue.toFixed(0)}`;
+
+        // Pending
+        const pending = allOrdersForShop.filter(o => o.status === 'PENDING').length;
+        document.getElementById('stat-pending').innerText = pending;
+
+        // Products
+        document.getElementById('stat-products').innerText = allProductsForShop.length;
+
+        // Low stock (<=5)
+        const lowStock = allProductsForShop.filter(p => p.quantity <= 5).length;
+        document.getElementById('stat-lowstock').innerText = lowStock;
+    }
+
+    // ===== PRODUCTS =====
+    async function loadProducts() {
+        const tbody = document.getElementById('products-table-body');
+        if (!activeShopId) { tbody.innerHTML = '<tr><td colspan="6" class="text-muted text-center">Select a shop first.</td></tr>'; return; }
+        try {
+            const products = await apiCall(`/products/shop/${activeShopId}`);
+            allProductsForShop = products;
+            if (!products.length) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-muted text-center py-3">No products. Add one!</td></tr>'; return;
+            }
+            tbody.innerHTML = products.map(p => {
+                const isLow = p.quantity <= 5;
+                const stockBadge = p.quantity <= 0
+                    ? '<span class="badge bg-danger rounded-pill">Out of Stock</span>'
+                    : isLow
+                        ? `<span class="badge bg-warning text-dark rounded-pill low-stock-badge">${p.quantity} (Low)</span>`
+                        : `<span class="badge bg-success rounded-pill">${p.quantity}</span>`;
+                return `
+                <tr id="prod-row-${p.productId}">
+                    <td>
+                        <div class="fw-semibold">${p.productName}</div>
+                        <small class="text-muted">${p.description ? p.description.substring(0, 40) + '...' : ''}</small>
+                    </td>
+                    <td class="fw-bold text-success">₹${parseFloat(p.price).toFixed(2)}</td>
+                    <td>${stockBadge}</td>
+                    <td><small>${p.category||'—'}</small></td>
+                    <td>
+                        <div class="d-flex gap-1 align-items-center">
+                            <input type="number" class="form-control form-control-sm quick-stock-input" id="stock-input-${p.productId}" min="0" value="${p.quantity}" title="Update stock">
+                            <button class="btn btn-outline-primary btn-sm" onclick="quickUpdateStock(${p.productId})" title="Update Stock">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-outline-primary btn-sm rounded-circle" onclick="openEditProduct(${p.productId})" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm rounded-circle" onclick="deleteProduct(${p.productId})" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-danger">Failed: ${err.message}</td></tr>`;
+        }
+    }
+
+    async function quickUpdateStock(productId) {
+        const input = document.getElementById(`stock-input-${productId}`);
+        const newQty = parseInt(input.value);
+        if (isNaN(newQty) || newQty < 0) { alert('Please enter a valid quantity'); return; }
+
+        const product = allProductsForShop.find(p => p.productId === productId);
+        if (!product) return;
+
+        try {
+            await apiCall(`/products/${productId}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    shopId: activeShopId,
+                    productName: product.productName,
+                    price: product.price,
+                    quantity: newQty,
+                    category: product.category || '',
+                    description: product.description || ''
+                })
+            });
+            await loadProducts();
+            updateStats();
+        } catch (err) {
+            alert('Failed to update stock: ' + err.message);
+        }
+    }
+
+    function openEditProduct(productId) {
+        const p = allProductsForShop.find(prod => prod.productId === productId);
+        if (!p) return;
+
+        document.getElementById('ep-id').value = p.productId;
+        document.getElementById('ep-name').value = p.productName;
+        document.getElementById('ep-price').value = p.price;
+        document.getElementById('ep-qty').value = p.quantity;
+        document.getElementById('ep-cat').value = p.category || '';
+        document.getElementById('ep-desc').value = p.description || '';
+        document.getElementById('edit-product-alert').innerHTML = '';
+
+        new bootstrap.Modal(document.getElementById('editProductModal')).show();
+    }
+
+    async function saveEditProduct() {
+        const alertEl = document.getElementById('edit-product-alert');
+        const id = document.getElementById('ep-id').value;
+        const body = {
+            shopId: activeShopId,
+            productName: document.getElementById('ep-name').value.trim(),
+            price: parseFloat(document.getElementById('ep-price').value),
+            quantity: parseInt(document.getElementById('ep-qty').value),
+            category: document.getElementById('ep-cat').value.trim(),
+            description: document.getElementById('ep-desc').value.trim()
+        };
+
+        if (!body.productName || isNaN(body.price) || isNaN(body.quantity)) {
+            alertEl.innerHTML = '<div class="alert alert-danger py-2 small">Fill in name, price, and quantity.</div>'; return;
+        }
+
+        try {
+            await apiCall(`/products/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+            bootstrap.Modal.getInstance(document.getElementById('editProductModal')).hide();
+            await loadProducts();
+            updateStats();
+        } catch (err) {
+            alertEl.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        }
+    }
+
+    async function addProduct() {
+        if (!activeShopId) { alert('Select a shop first'); return; }
+        const alertEl = document.getElementById('product-form-alert');
+        const body = {
+            shopId: activeShopId,
+            productName: document.getElementById('np-name').value.trim(),
+            price: parseFloat(document.getElementById('np-price').value),
+            quantity: parseInt(document.getElementById('np-qty').value),
+            category: document.getElementById('np-cat').value.trim(),
+            description: document.getElementById('np-desc').value.trim(),
+            stockStatus: 'IN_STOCK'
+        };
+        if (!body.productName || isNaN(body.price) || isNaN(body.quantity)) {
+            alertEl.innerHTML = '<div class="alert alert-danger py-2 small">Fill in name, price, and quantity.</div>'; return;
+        }
+        try {
+            await apiCall('/products', { method: 'POST', body: JSON.stringify(body) });
+            bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+            ['np-name','np-price','np-qty','np-cat','np-desc'].forEach(id => document.getElementById(id).value = '');
+            await loadProducts();
+            updateStats();
+        } catch (err) {
+            alertEl.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        }
+    }
+
+    async function deleteProduct(id) {
+        if (!confirm('Delete this product? This action cannot be undone.')) return;
+        try {
+            await apiCall(`/products/${id}`, { method: 'DELETE' });
+            await loadProducts();
+            updateStats();
+        } catch (err) { alert('Failed: ' + err.message); }
+    }
+
+    // ===== SERVICES =====
+    async function loadServices() {
+        const container = document.getElementById('services-list');
+        if (!activeShopId) { container.innerHTML = '<div class="text-muted">Select a shop first.</div>'; return; }
+        try {
+            const services = await apiCall(`/services/shop/${activeShopId}`);
+            if (!services.length) {
+                container.innerHTML = '<div class="text-muted text-center py-3">No services listed. Add one!</div>'; return;
+            }
+            container.innerHTML = services.map(s => `
+                <div class="card border-0 shadow-sm rounded-4 mb-3 p-3 d-flex flex-row justify-content-between align-items-center" id="svc-row-${s.serviceId}">
+                    <div>
+                        <h6 class="fw-bold mb-1"><i class="bi bi-check-circle-fill text-success me-2"></i>${s.serviceName}</h6>
+                        <p class="text-muted small mb-0 ms-4">${s.description||'No description'}</p>
+                    </div>
+                    <button class="btn btn-outline-danger btn-sm rounded-circle" onclick="deleteService(${s.serviceId})"><i class="bi bi-trash"></i></button>
+                </div>`).join('');
+        } catch (err) {
+            container.innerHTML = `<div class="text-danger">Failed: ${err.message}</div>`;
+        }
+    }
+
+    async function addService() {
+        if (!activeShopId) { alert('Select a shop first'); return; }
+        const alertEl = document.getElementById('service-form-alert');
+        const body = {
+            shopId: activeShopId,
+            serviceName: document.getElementById('nsvc-name').value.trim(),
+            description: document.getElementById('nsvc-desc').value.trim()
+        };
+        if (!body.serviceName) {
+            alertEl.innerHTML = '<div class="alert alert-danger py-2 small">Service name is required.</div>'; return;
+        }
+        try {
+            await apiCall('/services', { method: 'POST', body: JSON.stringify(body) });
+            bootstrap.Modal.getInstance(document.getElementById('addServiceModal')).hide();
+            document.getElementById('nsvc-name').value = '';
+            document.getElementById('nsvc-desc').value = '';
+            await loadServices();
+        } catch (err) {
+            alertEl.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        }
+    }
+
+    async function deleteService(id) {
+        if (!confirm('Delete this service?')) return;
+        try {
+            await apiCall(`/services/${id}`, { method: 'DELETE' });
+            document.getElementById(`svc-row-${id}`)?.remove();
+        } catch (err) { alert('Failed: ' + err.message); }
+    }
+
+    // ===== ORDERS =====
+    async function loadOrders() {
+        const tbody = document.getElementById('orders-table-body');
+        if (!activeShopId) { tbody.innerHTML = '<tr><td colspan="10" class="text-muted text-center">Select a shop first.</td></tr>'; return; }
+        try {
+            const orders = await apiCall(`/orders/shop/${activeShopId}`);
+            allOrdersForShop = orders;
+
+            // Apply filter
+            const filter = document.getElementById('order-filter').value;
+            const filtered = filter ? orders.filter(o => o.status === filter) : orders;
+
+            if (!filtered.length) {
+                tbody.innerHTML = '<tr><td colspan="10" class="text-muted text-center py-3">No orders found.</td></tr>';
+                updateStats();
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(o => {
+                const dateStr = o.orderDate ? new Date(o.orderDate).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '—';
+                return `
+                <tr class="order-detail-row">
+                    <td><small class="text-muted">#${o.orderId}</small></td>
+                    <td>
+                        <div class="fw-semibold">${o.customerName || o.userName || '—'}</div>
+                    </td>
+                    <td><small>${o.customerPhone || o.userPhone || '—'}</small></td>
+                    <td class="fw-semibold">${o.productName}</td>
+                    <td>${o.quantityOrdered}</td>
+                    <td class="text-success fw-bold">₹${parseFloat(o.totalAmount).toFixed(2)}</td>
+                    <td><span class="badge bg-secondary bg-opacity-25 text-dark rounded-pill">${o.paymentMethod || '—'}</span></td>
+                    <td><small>${dateStr}</small></td>
+                    <td><span class="badge bg-${STATUS_COLORS[o.status]||'secondary'} rounded-pill text-uppercase">${o.status}</span></td>
+                    <td>
+                        <select class="form-select form-select-sm w-auto" onchange="updateOrderStatus(${o.orderId}, this.value)">
+                            <option value="PENDING" ${o.status==='PENDING'?'selected':''}>Pending</option>
+                            <option value="CONFIRMED" ${o.status==='CONFIRMED'?'selected':''}>Confirmed</option>
+                            <option value="DELIVERED" ${o.status==='DELIVERED'?'selected':''}>Delivered</option>
+                            <option value="CANCELLED" ${o.status==='CANCELLED'?'selected':''}>Cancelled</option>
+                        </select>
+                    </td>
+                </tr>
+                ${o.deliveryAddress ? `<tr class="order-detail-row"><td></td><td colspan="9"><small class="text-muted"><i class="bi bi-geo-alt me-1"></i>${o.deliveryAddress}</small></td></tr>` : ''}`;
+            }).join('');
+            updateStats();
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="10" class="text-danger">Failed: ${err.message}</td></tr>`;
+        }
+    }
+
+    async function updateOrderStatus(orderId, status) {
+        try {
+            await apiCall(`/orders/${orderId}/status?status=${status}`, { method: 'PUT' });
+            await loadOrders();
+        } catch (err) { alert('Failed to update order: ' + err.message); }
+    }
+
+    // ===== REQUESTS =====
+    async function loadRequests() {
+        const tbody = document.getElementById('requests-table-body');
+        if (!activeShopId) { tbody.innerHTML = '<tr><td colspan="6" class="text-muted text-center">Select a shop first.</td></tr>'; return; }
+        try {
+            const reqs = await apiCall(`/requests/shop/${activeShopId}`);
+            if (!reqs.length) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-muted text-center py-3">No product requests.</td></tr>'; return;
+            }
+            tbody.innerHTML = reqs.map(r => `
+                <tr>
+                    <td><small class="text-muted">#${r.requestId}</small></td>
+                    <td class="fw-semibold">${r.productName}</td>
+                    <td>${r.customerName||'—'}</td>
+                    <td>${r.quantityRequested}</td>
+                    <td><span class="badge bg-${r.status==='FULFILLED'?'success':'warning'} rounded-pill text-uppercase">${r.status}</span></td>
+                    <td>
+                        ${r.status!=='FULFILLED' ? `<button class="btn btn-sm btn-outline-success rounded-pill" onclick="fulfillRequest(${r.requestId})">Fulfill</button>` : '—'}
+                    </td>
+                </tr>`).join('');
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-danger">Failed: ${err.message}</td></tr>`;
+        }
+    }
+
+    async function fulfillRequest(id) {
+        try {
+            await apiCall(`/requests/${id}/status?status=FULFILLED`, { method: 'PUT' });
+            await loadRequests();
+        } catch (err) { alert('Failed: ' + err.message); }
+    }
+
+    // ===== REVIEWS =====
+    async function loadReviews() {
+        const container = document.getElementById('reviews-list-owner');
+        if (!activeShopId) { container.innerHTML = '<div class="text-muted">Select a shop first.</div>'; return; }
+        try {
+            const reviews = await apiCall(`/reviews/shop/${activeShopId}`);
+
+            // Average rating
+            let avgData = { averageRating: 0 };
+            try { avgData = await apiCall(`/reviews/shop/${activeShopId}/average`); } catch (_) {}
+            const avg = parseFloat(avgData.averageRating) || 0;
+            document.getElementById('review-avg-rating').innerText = avg.toFixed(1);
+            document.getElementById('review-total-count').innerText = `(${reviews.length} review${reviews.length !== 1 ? 's' : ''})`;
+
+            let starsHtml = '';
+            for (let i = 1; i <= 5; i++) {
+                starsHtml += `<i class="bi ${i <= Math.round(avg) ? 'bi-star-fill' : 'bi-star'} review-star"></i>`;
+            }
+            document.getElementById('review-avg-stars').innerHTML = starsHtml;
+
+            if (!reviews.length) {
+                container.innerHTML = '<div class="text-center py-4 text-muted"><i class="bi bi-chat-left-text fs-1 d-block mb-2"></i>No reviews yet. Customers will leave reviews after purchasing.</div>';
+                return;
+            }
+
+            container.innerHTML = reviews.map(r => {
+                const stars = Array.from({length:5}, (_, i) => `<i class="bi ${i < r.rating ? 'bi-star-fill' : 'bi-star'} review-star small"></i>`).join('');
+                return `
+                <div class="card border-0 bg-light rounded-4 p-3 mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <h6 class="fw-bold mb-0"><i class="bi bi-person-circle text-primary me-1"></i>${r.userName || 'Customer'}</h6>
+                        <div>${stars}</div>
+                    </div>
+                    <p class="text-muted small mb-0 ms-4">${r.comment || '—'}</p>
+                </div>`;
+            }).join('');
+        } catch (err) {
+            container.innerHTML = `<div class="text-danger">Failed: ${err.message}</div>`;
+        }
+    }
+
+    // ===== SHOP PROFILE =====
+    async function loadShopProfile() {
+        const container = document.getElementById('shop-profile-content');
+        if (!activeShopId || !activeShopData) {
+            container.innerHTML = '<div class="text-muted text-center py-4">Select a shop first.</div>';
+            return;
+        }
+        const s = activeShopData;
+        container.innerHTML = `
+            <div class="shop-profile-header mb-4">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                    <div>
+                        <span class="badge bg-warning text-dark rounded-pill mb-2">${s.category}</span>
+                        <h3 class="fw-bold mb-1">${s.shopName}</h3>
+                        <p class="opacity-75 mb-3">${s.description || 'No description set'}</p>
+                        <div class="d-flex flex-wrap gap-4 opacity-75 small">
+                            <span><i class="bi bi-person-fill me-1"></i> ${s.ownerName}</span>
+                            <span><i class="bi bi-telephone-fill me-1"></i> ${s.phone}</span>
+                            <span><i class="bi bi-geo-alt-fill me-1"></i> ${s.village}</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-light rounded-pill px-4" onclick="openEditShop()">
+                        <i class="bi bi-pencil me-1"></i> Edit Shop
+                    </button>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-info-circle text-primary me-2"></i>Shop Information</h6>
+                        <table class="table table-borderless small mb-0">
+                            <tr><td class="text-muted fw-semibold" style="width:120px">Shop Name</td><td>${s.shopName}</td></tr>
+                            <tr><td class="text-muted fw-semibold">Owner</td><td>${s.ownerName}</td></tr>
+                            <tr><td class="text-muted fw-semibold">Phone</td><td>${s.phone}</td></tr>
+                            <tr><td class="text-muted fw-semibold">Village</td><td>${s.village}</td></tr>
+                            <tr><td class="text-muted fw-semibold">Address</td><td>${s.address}</td></tr>
+                            <tr><td class="text-muted fw-semibold">Category</td><td><span class="badge bg-primary bg-opacity-10 text-primary rounded-pill">${s.category}</span></td></tr>
+                            <tr><td class="text-muted fw-semibold">Coordinates</td><td>${s.latitude?.toFixed(4)}, ${s.longitude?.toFixed(4)}</td></tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-map text-danger me-2"></i>Shop Location</h6>
+                        <div id="profile-map" style="height:250px; border-radius:0.75rem; overflow:hidden; z-index:1;"></div>
+                        <div class="mt-2">
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=${s.latitude},${s.longitude}" target="_blank" class="btn btn-outline-success btn-sm rounded-pill w-100">
+                                <i class="bi bi-sign-turn-right me-1"></i> Get Directions
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+        // Init map
+        setTimeout(() => {
+            const lat = s.latitude || 17.385;
+            const lng = s.longitude || 78.4867;
+            const map = L.map('profile-map').setView([lat, lng], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap', maxZoom: 19
+            }).addTo(map);
+            L.marker([lat, lng]).addTo(map).bindPopup(`<strong>${s.shopName}</strong><br>${s.address || s.village}`).openPopup();
+            setTimeout(() => map.invalidateSize(), 200);
+        }, 100);
+    }
+
+    function openEditShop() {
+        if (!activeShopData) return;
+        const s = activeShopData;
+        document.getElementById('es-name').value = s.shopName;
+        document.getElementById('es-owner').value = s.ownerName;
+        document.getElementById('es-phone').value = s.phone;
+        document.getElementById('es-village').value = s.village;
+        document.getElementById('es-address').value = s.address;
+        document.getElementById('es-category').value = s.category;
+        document.getElementById('es-lat').value = s.latitude;
+        document.getElementById('es-lng').value = s.longitude;
+        document.getElementById('es-desc').value = s.description || '';
+        document.getElementById('edit-shop-alert').innerHTML = '';
+        new bootstrap.Modal(document.getElementById('editShopModal')).show();
+    }
+
+    async function saveEditShop() {
+        const alertEl = document.getElementById('edit-shop-alert');
+        const body = {
+            shopName: document.getElementById('es-name').value.trim(),
+            ownerName: document.getElementById('es-owner').value.trim(),
+            phone: document.getElementById('es-phone').value.trim(),
+            village: document.getElementById('es-village').value.trim(),
+            address: document.getElementById('es-address').value.trim(),
+            category: document.getElementById('es-category').value,
+            description: document.getElementById('es-desc').value.trim(),
+            latitude: parseFloat(document.getElementById('es-lat').value) || 17.385,
+            longitude: parseFloat(document.getElementById('es-lng').value) || 78.4867
+        };
+
+        if (!body.shopName || !body.ownerName || !body.phone || !body.village || !body.address) {
+            alertEl.innerHTML = '<div class="alert alert-danger py-2 small">Please fill in all required fields.</div>'; return;
+        }
+
+        try {
+            await apiCall(`/shops/${activeShopId}`, { method: 'PUT', body: JSON.stringify(body) });
+            bootstrap.Modal.getInstance(document.getElementById('editShopModal')).hide();
+            // Refresh shop data
+            const updatedShop = await apiCall(`/shops/${activeShopId}`);
+            activeShopData = updatedShop;
+            const idx = myShops.findIndex(s => s.shopId === activeShopId);
+            if (idx !== -1) myShops[idx] = updatedShop;
+            // Update selector text
+            const sel = document.getElementById('shop-selector');
+            sel.options[sel.selectedIndex].text = updatedShop.shopName;
+            await loadShopProfile();
+            alert('Shop updated successfully!');
+        } catch (err) {
+            alertEl.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        }
+    }
+
+    // ===== CREATE SHOP =====
+    let newShopMap = null;
+    let newShopMarker = null;
+
+    function initNewShopMap() {
+        try {
+            const mapEl = document.getElementById('ns-map-preview');
+            if (!mapEl) return;
+            // Initialize when modal is shown
+            document.getElementById('addShopModal').addEventListener('shown.bs.modal', () => {
+                if (!newShopMap) {
+                    newShopMap = L.map('ns-map-preview').setView([17.385, 78.4867], 12);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap', maxZoom: 19
+                    }).addTo(newShopMap);
+                    newShopMarker = L.marker([17.385, 78.4867], { draggable: true }).addTo(newShopMap);
+                    newShopMarker.on('dragend', function() {
+                        const pos = newShopMarker.getLatLng();
+                        document.getElementById('ns-lat').value = pos.lat.toFixed(6);
+                        document.getElementById('ns-lng').value = pos.lng.toFixed(6);
+                    });
+                }
+                setTimeout(() => newShopMap.invalidateSize(), 200);
+            });
+        } catch (e) { console.log('Map init deferred'); }
+    }
+
+    function getMyLocation(prefix) {
+        if (!navigator.geolocation) {
+            alert('Geolocation is not supported by your browser.');
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                document.getElementById(`${prefix}-lat`).value = pos.coords.latitude.toFixed(6);
+                document.getElementById(`${prefix}-lng`).value = pos.coords.longitude.toFixed(6);
+                if (prefix === 'ns' && newShopMap && newShopMarker) {
+                    newShopMap.setView([pos.coords.latitude, pos.coords.longitude], 15);
+                    newShopMarker.setLatLng([pos.coords.latitude, pos.coords.longitude]);
+                }
+                alert('Location captured successfully!');
+            },
+            (err) => {
+                alert('Failed to get location: ' + err.message);
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    }
+
+    async function createShop() {
+        const alertEl = document.getElementById('shop-form-alert');
+        const body = {
+            shopName: document.getElementById('ns-name').value.trim(),
+            ownerName: document.getElementById('ns-owner').value.trim(),
+            phone: document.getElementById('ns-phone').value.trim(),
+            village: document.getElementById('ns-village').value.trim(),
+            address: document.getElementById('ns-address').value.trim(),
+            category: document.getElementById('ns-category').value,
+            description: document.getElementById('ns-desc').value.trim(),
+            latitude: parseFloat(document.getElementById('ns-lat').value) || 17.385,
+            longitude: parseFloat(document.getElementById('ns-lng').value) || 78.4867
+        };
+        if (!body.shopName || !body.ownerName || !body.phone || !body.village || !body.address) {
+            alertEl.innerHTML = '<div class="alert alert-danger py-2 small">Please fill in all required fields.</div>'; return;
+        }
+        try {
+            await apiCall('/shops', { method: 'POST', body: JSON.stringify(body) });
+            bootstrap.Modal.getInstance(document.getElementById('addShopModal')).hide();
+            await loadShops();
+            alert('Shop created successfully!');
+        } catch (err) {
+            alertEl.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        }
+    }
+
+    // ===== TAB SWITCHING =====
+    function switchTab(tab, btn) {
+        document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
+        document.getElementById('panel-' + tab).classList.add('active');
+        btn.classList.add('active-tab');
+    }
+</script>
+</body>
+</html>
