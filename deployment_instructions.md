@@ -104,3 +104,40 @@ The application seeds default data on startup if the database is empty:
 - **Shop Owner 1:** `owner@villageconnect.com` / `owner123`
 - **Shop Owner 2:** `owner2@villageconnect.com` / `owner123`
 - **Customer:** `customer@villageconnect.com` / `customer123`
+
+---
+
+## 7. Render Deployment (Docker + MySQL)
+
+Render supports deploying containerized applications directly using a `Dockerfile`.
+
+### Step 1: Provision a Managed MySQL Database
+1. Go to your Render Dashboard (or another database hosting provider like Clever Cloud, PlanetScale, or Aiven) and provision a managed **MySQL** instance.
+2. Retrieve your database connection host, database name, username, and password.
+
+### Step 2: Create a Web Service on Render
+1. In the Render Dashboard, click **New** -> **Web Service**.
+2. Connect your GitHub repository `https://github.com/MUTAKANI-DINNI-SRAVYA/Village-Connect.git`.
+3. Configure the following basic details:
+   - **Name**: `village-connect`
+   - **Environment / Runtime**: **Docker** (Render will automatically locate the root `Dockerfile` and build it)
+   - **Region**: Select the region closest to your users.
+   - **Plan**: Select the free tier or a paid plan.
+
+### Step 3: Configure Environment Variables
+In your Render Web Service settings, navigate to the **Environment** tab and add the following keys to map directly into Spring Boot configurations:
+
+| Environment Variable | Example/Value |
+| --- | --- |
+| `SPRING_DATASOURCE_URL` | `jdbc:mysql://<your-db-host>:<port>/<db-name>?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC` |
+| `SPRING_DATASOURCE_USERNAME` | `your_database_username` |
+| `SPRING_DATASOURCE_PASSWORD` | `your_database_password` |
+| `GEMINI_API_KEY` | `your_gemini_api_key_here` |
+| `JWT_SECRET` | `A_very_long_secure_custom_jwt_secret_key_for_production` |
+
+*Note: The application is configured to automatically bind its server port to Render's dynamic port via the `${PORT}` environment variable, so no manual port variables are required.*
+
+### Step 4: Build and Launch
+1. Click **Deploy Web Service**.
+2. Render will build your Docker image (compiling your Java code via Maven) and deploy the service.
+3. Once the logs show `Started VillageconnectApplication`, your app is live! You can access it via the URL provided by Render.
