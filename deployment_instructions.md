@@ -130,19 +130,16 @@ Render supports deploying containerized applications directly using a `Dockerfil
    - **Plan**: Select the free tier or a paid plan.
 
 ### Step 3: Configure Environment Variables
-In your Render Web Service settings, navigate to the **Environment** tab and add the following keys to map directly into Spring Boot configurations:
+In your Render Web Service settings, navigate to the **Environment** tab and add the following keys:
 
-| Environment Variable | Example/Value |
+| Environment Variable | Description / Value |
 | --- | --- |
-| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://<host>:<port>/<dbname>` (Convert the Render connection URL string into a JDBC URL format starting with `jdbc:postgresql://`) |
-| `SPRING_DATASOURCE_USERNAME` | `your_postgres_username` |
-| `SPRING_DATASOURCE_PASSWORD` | `your_postgres_password` |
-| `SPRING_DATASOURCE_DRIVER` | `org.postgresql.Driver` |
-| `SPRING_JPA_DIALECT` | `org.hibernate.dialect.PostgreSQLDialect` |
-| `GEMINI_API_KEY` | `your_gemini_api_key_here` |
-| `JWT_SECRET` | `A_very_long_secure_custom_jwt_secret_key_for_production` |
+| `DATABASE_URL` | **(Recommended)** Paste Render's Internal Database URL (e.g. `postgresql://user:pass@host:5432/villageconnect`). The application automatically converts it to JDBC format and configures credentials! |
+| *or* `SPRING_DATASOURCE_URL` | Alternatively, provide standard JDBC URL: `jdbc:postgresql://<host>:<port>/<dbname>` with `SPRING_DATASOURCE_USERNAME` and `SPRING_DATASOURCE_PASSWORD`. |
+| `GEMINI_API_KEY` | *(Optional)* Your Google Gemini API Key from Google AI Studio. |
+| `JWT_SECRET` | *(Recommended)* A custom secure secret string for signing JWT tokens in production. |
 
-*Note: The application is configured to automatically bind its server port to Render's dynamic port via the `${PORT}` environment variable, so no manual port variables are required.*
+*Note: The application automatically binds to Render's dynamic port via `${PORT}`. Database driver and Hibernate dialect are automatically detected without requiring manual driver or dialect parameters.*
 
 ### Step 4: Build and Launch
 1. Click **Deploy Web Service**.
