@@ -1,5 +1,6 @@
 package com.villageconnect.controller;
 
+import com.villageconnect.entity.Order;
 import com.villageconnect.entity.User;
 import com.villageconnect.repository.*;
 import com.villageconnect.service.UserService;
@@ -33,6 +34,9 @@ public class AdminController {
     @Autowired
     private ProductRequestRepository requestRepository;
 
+    @Autowired
+    private OrderRepository orderRepository;
+
     // Get statistics summary
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getSystemStats() {
@@ -40,8 +44,15 @@ public class AdminController {
         stats.put("totalUsers", userRepository.count());
         stats.put("totalShops", shopRepository.count());
         stats.put("totalProducts", productRepository.count());
+        stats.put("totalOrders", orderRepository.count());
         stats.put("totalRequests", requestRepository.count());
         return ResponseEntity.ok(stats);
+    }
+
+    // Get all orders across the system
+    @GetMapping("/orders")
+    public ResponseEntity<List<Order>> getAllOrders() {
+        return ResponseEntity.ok(orderRepository.findAll());
     }
 
     // Get all users in system
